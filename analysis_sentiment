@@ -1,0 +1,39 @@
+# coding=utf-8
+import requests
+
+# 「xxxxx」は、先ほどメモしておいたAPIキーで書き換える。
+ACCESS_TOKEN = "AIzaSyATyvnZDkGrdJ8yeG60TERzVR82QYtRPj8"
+ANALYZE_SENTIMENT_URL = 'https://language.googleapis.com/v1/documents:analyzeSentiment?key={}'.format(ACCESS_TOKEN)
+TEXT = 'キャラが固まってしまって、そういうの出来ずにずるずる来てますね。おいおい出していければと！' \
+
+
+# APIアクセスし、特定の文章の感情分析結果を取得する。
+def analyze_sentiment(content):
+    header = {'Content-Type': 'application/json'}
+    body = {
+        "document": {
+            "type": "PLAIN_TEXT",
+            "language": "JA",
+            "content": content
+        },
+        "encodingType": "UTF8"
+    }
+    response = requests.post(ANALYZE_SENTIMENT_URL, headers=header, json=body).json()
+    return response
+
+# 感情分析結果から感情の揺れ動きの数値を取得する。
+def get_sentiment_magnitude(response):
+    magnitude = response['documentSentiment']['magnitude']
+    return magnitude
+
+# 感情分析結果から感情スコア（-1から1で値が大きいほどポジティブな感情を意味する）を取得する。
+def get_sentiment_score(response):
+    score = response['documentSentiment']['score']
+    return score
+
+# 感情分析を行い、分析結果の各値を文章として出力する。
+response = analyze_sentiment(TEXT)
+sentiment_magnitude = get_sentiment_magnitude(response)
+sentiment_score = get_sentiment_score(response)
+print('----------------------------------------')
+print('感情分析した文章:{}\n感情分析結果:{}\n感情の揺れ動きの大きさ:{}\n感情スコア:{}'.format(TEXT, response, sentiment_magnitude, sentiment_score))
